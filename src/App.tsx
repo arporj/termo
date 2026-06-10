@@ -601,10 +601,9 @@ export default function App() {
         onAuthSuccess={handleAuthSuccess}
       />
 
-      {/* Modal de Ajuda (Como Jogar) */}
       {showHelpModal && (
-        <div className="modal-overlay">
-          <div className="modal-content glass-panel">
+        <div className="modal-overlay" onClick={() => setShowHelpModal(false)}>
+          <div className="modal-content glass-panel" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowHelpModal(false)} className="modal-close">
               <X size={20} />
             </button>

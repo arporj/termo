@@ -116,10 +116,9 @@ export const StatsModal: React.FC<StatsModalProps> = ({
   const winRate = stats.gamesPlayed > 0 
     ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) 
     : 0;
-
   return (
-    <div className="modal-overlay">
-      <div className="modal-content glass-panel">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content glass-panel" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="modal-close">
           <X size={20} />
         </button>
