@@ -326,19 +326,16 @@ body {
 
 /* Letter States */
 .letter-box.correct {
-  background: var(--color-correct);
   border-color: transparent;
   animation: flip-correct 0.5s ease forwards;
 }
 
 .letter-box.present {
-  background: var(--color-present);
   border-color: transparent;
   animation: flip-present 0.5s ease forwards;
 }
 
 .letter-box.absent {
-  background: var(--color-absent);
   border-color: transparent;
   animation: flip-absent 0.5s ease forwards;
 }
@@ -576,15 +573,15 @@ body {
 @keyframes flip-correct {
   0% { transform: rotateX(0deg); background: var(--color-empty); }
   45% { transform: rotateX(90deg); background: var(--color-empty); }
-  55% { transform: rotateX(90deg); background: #10b981; }
-  100% { transform: rotateX(0deg); background: #10b981; }
+  55% { transform: rotateX(90deg); background: var(--color-correct); }
+  100% { transform: rotateX(0deg); background: var(--color-correct); }
 }
 
 @keyframes flip-present {
   0% { transform: rotateX(0deg); background: var(--color-empty); }
   45% { transform: rotateX(90deg); background: var(--color-empty); }
-  55% { transform: rotateX(90deg); background: #d97706; }
-  100% { transform: rotateX(0deg); background: #d97706; }
+  55% { transform: rotateX(90deg); background: var(--color-present); }
+  100% { transform: rotateX(0deg); background: var(--color-present); }
 }
 
 @keyframes flip-absent {
