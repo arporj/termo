@@ -263,21 +263,47 @@ export default function App() {
     }
   };
 
-  // Remove o caractere focado ou volta para a esquerda limpando
+  // Remove o caractere focado ou volta para a esquerda limpando de trás para frente
   const handleDelete = () => {
     if (isCompleted) return;
 
     const newGuess = [...currentGuess];
+
+    // Caso 1: Todas as caixas estão cheias. 
+    // Se não há nenhum vazio, o comportamento padrão ao apertar Backspace é apagar a última letra (índice 4).
+    const isFull = newGuess.every(char => char !== '');
+    if (isFull) {
+      newGuess[4] = '';
+      setCurrentGuess(newGuess);
+      setFocusedLetterIndex(4);
+      return;
+    }
+
+    // Caso 2: A caixa atual em foco está preenchida. Limpa-a e mantém o foco nela.
     if (newGuess[focusedLetterIndex] !== '') {
       newGuess[focusedLetterIndex] = '';
       setCurrentGuess(newGuess);
+      return;
+    }
+
+    // Caso 3: A caixa atual está vazia. Procuramos a primeira letra preenchida à esquerda para apagar.
+    let targetIndex = -1;
+    for (let i = focusedLetterIndex - 1; i >= 0; i--) {
+      if (newGuess[i] !== '') {
+        targetIndex = i;
+        break;
+      }
+    }
+
+    if (targetIndex !== -1) {
+      newGuess[targetIndex] = '';
+      setCurrentGuess(newGuess);
+      setFocusedLetterIndex(targetIndex);
     } else {
-      // Se o foco ja estava vazio, volta 1 casa para a esquerda e limpa
+      // Se não há nenhuma preenchida à esquerda, mas a posição focada atual é maior que 0 e está vazia,
+      // apenas recua o foco para a esquerda para navegação.
       if (focusedLetterIndex > 0) {
-        const prevIndex = focusedLetterIndex - 1;
-        newGuess[prevIndex] = '';
-        setCurrentGuess(newGuess);
-        setFocusedLetterIndex(prevIndex);
+        setFocusedLetterIndex(focusedLetterIndex - 1);
       }
     }
   };
