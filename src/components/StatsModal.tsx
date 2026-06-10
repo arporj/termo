@@ -1,6 +1,6 @@
 import React from 'react';
 import { checkGuess } from '../utils/gameLogic';
-import { Share2, LogOut, Link2, X } from 'lucide-react';
+import { Share2, LogOut, Link2, X, Trash2 } from 'lucide-react';
 
 interface GameStatsData {
   currentWinStreak: number;
@@ -194,6 +194,24 @@ export const StatsModal: React.FC<StatsModalProps> = ({
               </button>
             </div>
           )}
+        </div>
+
+        {/* Seção de reset de LocalStorage para testes */}
+        <div style={{ marginTop: '1.5rem', borderTop: '1px dashed var(--panel-border)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(239, 68, 68, 0.7)' }}>[Desenvolvimento/Testes]</span>
+          <button 
+            onClick={() => {
+              if (window.confirm("Tem certeza que deseja apagar todas as estatísticas e progresso local do navegador?")) {
+                localStorage.clear();
+                window.location.reload();
+              }
+            }} 
+            className="btn" 
+            style={{ width: '100%', background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.15)', color: '#f87171' }}
+          >
+            <Trash2 size={16} />
+            Resetar LocalStorage (Começar do Zero)
+          </button>
         </div>
       </div>
     </div>
