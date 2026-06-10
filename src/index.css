@@ -327,17 +327,26 @@ body {
 /* Letter States */
 .letter-box.correct {
   border-color: transparent;
-  animation: flip-correct 0.5s ease forwards;
+  animation-name: flip-correct;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
 }
 
 .letter-box.present {
   border-color: transparent;
-  animation: flip-present 0.5s ease forwards;
+  animation-name: flip-present;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
 }
 
 .letter-box.absent {
   border-color: transparent;
-  animation: flip-absent 0.5s ease forwards;
+  animation-name: flip-absent;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
 }
 
 /* Keyboards */
