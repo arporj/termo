@@ -591,11 +591,11 @@ body {
   100% { transform: rotateX(0deg); background: var(--color-absent); }
 }
 
-.delay-0 { animation-delay: 0ms; }
-.delay-1 { animation-delay: 150ms; }
-.delay-2 { animation-delay: 300ms; }
-.delay-3 { animation-delay: 450ms; }
-.delay-4 { animation-delay: 600ms; }
+.letter-box.delay-0 { animation-delay: 0ms; }
+.letter-box.delay-1 { animation-delay: 150ms; }
+.letter-box.delay-2 { animation-delay: 300ms; }
+.letter-box.delay-3 { animation-delay: 450ms; }
+.letter-box.delay-4 { animation-delay: 600ms; }
 
 /* Status message banner */
 .status-banner {
