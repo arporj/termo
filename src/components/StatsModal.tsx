@@ -3,8 +3,10 @@ import { checkGuess } from '../utils/gameLogic';
 import { Share2, LogOut, Link2, X } from 'lucide-react';
 
 interface GameStatsData {
-  currentStreak: number;
-  maxStreak: number;
+  currentWinStreak: number;
+  maxWinStreak: number;
+  currentDailyStreak: number;
+  maxDailyStreak: number;
   gamesPlayed: number;
   gamesWon: number;
   guessesDistribution: Record<number, number>;
@@ -95,11 +97,19 @@ export const StatsModal: React.FC<StatsModalProps> = ({
     const totalAttempts = Math.max(...guessesByBoard.map(g => g.length));
     const scoreStr = isSolvedAll ? `${totalAttempts}/${maxGuesses}` : `X/${maxGuesses}`;
     
+    // Verifica recordes e adiciona medalhas correspondentes
+    const isDailyRecord = stats.currentDailyStreak >= stats.maxDailyStreak && stats.maxDailyStreak > 0;
+    const isWinRecord = stats.currentWinStreak >= stats.maxWinStreak && stats.maxWinStreak > 0;
+
     const titleText = `Joguei o ${modeNames[gameMode]}!\nResultado: ${scoreStr}\n\n`;
     const emojis = getEmojiGrid();
+    
+    const statsText = `\n🔥 Dias Seguidos: ${stats.currentDailyStreak}${isDailyRecord ? ' 🥇 (Novo Recorde!)' : ''}` +
+      `\n🎯 Vitórias Sem Errar: ${stats.currentWinStreak}${isWinRecord ? ' 🏆 (Novo Recorde!)' : ''}\n`;
+
     const linkText = `\nJogue também em: ${window.location.origin}`;
 
-    const fullMessage = encodeURIComponent(titleText + emojis + linkText);
+    const fullMessage = encodeURIComponent(titleText + emojis + statsText + linkText);
     window.open(`https://api.whatsapp.com/send?text=${fullMessage}`, '_blank');
   };
 
@@ -119,24 +129,35 @@ export const StatsModal: React.FC<StatsModalProps> = ({
           Modo: {modeNames[gameMode]}
         </div>
 
-        <div className="stats-grid">
-          <div className="stat-item">
-            <div className="stat-val">{stats.gamesPlayed}</div>
-            <div className="stat-lbl">Partidas</div>
+        {/* stats-grid atualizado para ter 4 colunas em vez de 3 */}
+        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+          <div className="stat-item" style={{ padding: '0.75rem 0.25rem' }}>
+            <div className="stat-val" style={{ fontSize: '1.5rem' }}>{stats.gamesPlayed}</div>
+            <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Partidas</div>
           </div>
-          <div className="stat-item">
-            <div className="stat-val">{winRate}%</div>
-            <div className="stat-lbl">Vitórias</div>
+          <div className="stat-item" style={{ padding: '0.75rem 0.25rem' }}>
+            <div className="stat-val" style={{ fontSize: '1.5rem' }}>{winRate}%</div>
+            <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Vitórias</div>
           </div>
-          <div className="stat-item">
-            <div className="stat-val">{stats.currentStreak}</div>
-            <div className="stat-lbl">Streak Atual</div>
+          <div className="stat-item" style={{ padding: '0.75rem 0.25rem' }}>
+            <div className="stat-val" style={{ fontSize: '1.5rem' }}>{stats.currentDailyStreak}</div>
+            <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Dias Seg.</div>
+          </div>
+          <div className="stat-item" style={{ padding: '0.75rem 0.25rem' }}>
+            <div className="stat-val" style={{ fontSize: '1.5rem' }}>{stats.currentWinStreak}</div>
+            <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Vit. Seg.</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', padding: '0 0.5rem' }}>
-          <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Streak Máxima:</span>
-          <span style={{ fontWeight: 700, color: '#f8fafc' }}>{stats.maxStreak} dias/vitórias</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', padding: '0 0.5rem', fontSize: '0.85rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#94a3b8' }}>Recorde Dias Seguidos:</span>
+            <span style={{ fontWeight: 700, color: '#f8fafc' }}>{stats.maxDailyStreak} dias</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#94a3b8' }}>Recorde Vitórias Seguidas:</span>
+            <span style={{ fontWeight: 700, color: '#f8fafc' }}>{stats.maxWinStreak} vitórias</span>
+          </div>
         </div>
 
         {isGameCompleted && (
