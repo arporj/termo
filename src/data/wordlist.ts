@@ -1,6 +1,6 @@
 // Lista de palavras de 5 letras em português (normalizadas, sem acentos ou cedilha)
 // Estas palavras podem ser selecionadas como as palavras do dia.
-export const WORDS: string[] = [
+const RAW_WORDS: string[] = [
   "termo", "sagaz", "nobre", "plena", "afeto", "audaz", "vigor", "saber", "fazer", "comer",
   "carro", "mundo", "tempo", "viver", "justo", "ideia", "gente", "ponto", "porta", "campo",
   "grupo", "forca", "busca", "honra", "corpo", "falar", "olhar", "causa", "plano", "carta",
@@ -68,8 +68,7 @@ export const WORDS: string[] = [
 
 // Lista maior de palavras aceitas como palpites válidos (para evitar que o jogador digite letras sem sentido)
 // Ela inclui todas as palavras de WORDS e outras que o usuário pode querer tentar.
-export const VALID_GUESSES: Set<string> = new Set([
-  ...WORDS,
+const RAW_VALID_GUESSES: string[] = [
   // Outras palavras que podem ser válidas como digitação (normalizadas)
   "ababa", "abada", "abade", "abafo", "abalo", "abano", "abata", "abate", "abati", "abato",
   "abeta", "abete", "abeto", "abono", "abulo", "acaba", "acabe", "acabo", "acaso", "acata",
@@ -316,5 +315,11 @@ export const VALID_GUESSES: Set<string> = new Set([
   "juraa", "juras", "jurai", "juram", "jurar", "juras", "jurei", "jurem", "jures", "juria",
   "juris", "juri", "juroa", "juros", "jurou", "jurut", "jusas", "juses", "justa", "juste",
   "justo", "jutas", "jutes", "jutos", "juvas", "juves", "juvia", "juzao", "juzas"
-]);
+];
+
+// Exporta as listas e conjuntos garantindo que APENAS palavras com exatamente 5 letras sejam aceitas
+export const WORDS: string[] = RAW_WORDS.filter(w => w.length === 5);
+export const VALID_GUESSES: Set<string> = new Set(
+  [...WORDS, ...RAW_VALID_GUESSES].filter(w => w.length === 5)
+);
 export const WORDS_SET = new Set(WORDS);
