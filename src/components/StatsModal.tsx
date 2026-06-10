@@ -104,8 +104,8 @@ export const StatsModal: React.FC<StatsModalProps> = ({
     const titleText = `Joguei o ${modeNames[gameMode]}!\nResultado: ${scoreStr}\n\n`;
     const emojis = getEmojiGrid();
     
-    const statsText = `\n🔥 Dias Seguidos: ${stats.currentDailyStreak}${isDailyRecord ? ' 🥇 (Novo Recorde!)' : ''}` +
-      `\n🎯 Vitórias Sem Errar: ${stats.currentWinStreak}${isWinRecord ? ' 🏆 (Novo Recorde!)' : ''}\n`;
+    const statsText = `\n🔥 Dias Seguidos: ${stats.currentDailyStreak}${isDailyRecord ? ' 🏆 (Recorde!)' : ''}` +
+      `\n🎯 Vitórias Sem Errar: ${stats.currentWinStreak}${isWinRecord ? ' 🥇 (Recorde!)' : ''}\n`;
 
     const linkText = `\nJogue também em: ${window.location.origin}`;
 
