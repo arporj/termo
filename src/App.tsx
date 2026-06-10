@@ -10,16 +10,20 @@ import { BarChart3, HelpCircle, User, LogOut, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface GameStatsData {
-  currentStreak: number;
-  maxStreak: number;
+  currentWinStreak: number;
+  maxWinStreak: number;
+  currentDailyStreak: number;
+  maxDailyStreak: number;
   gamesPlayed: number;
   gamesWon: number;
   guessesDistribution: Record<number, number>;
 }
 
 const defaultStats: GameStatsData = {
-  currentStreak: 0,
-  maxStreak: 0,
+  currentWinStreak: 0,
+  maxWinStreak: 0,
+  currentDailyStreak: 0,
+  maxDailyStreak: 0,
   gamesPlayed: 0,
   gamesWon: 0,
   guessesDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 }
@@ -33,7 +37,8 @@ export default function App() {
   // Estados do Jogo Ativo
   const [answers, setAnswers] = useState<string[]>([]);
   const [guessesByBoard, setGuessesByBoard] = useState<string[][]>([[]]);
-  const [currentGuess, setCurrentGuess] = useState('');
+  const [currentGuess, setCurrentGuess] = useState<string[]>(Array(5).fill(''));
+  const [focusedLetterIndex, setFocusedLetterIndex] = useState<number>(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [shaking, setShaking] = useState(false);
   
@@ -113,7 +118,8 @@ export default function App() {
         if (savedState.date === today) {
           setGuessesByBoard(savedState.guessesByBoard);
           setIsCompleted(savedState.isCompleted);
-          setCurrentGuess('');
+          setCurrentGuess(Array(5).fill(''));
+          setFocusedLetterIndex(0);
           return;
         }
       } catch (e) {
@@ -125,7 +131,8 @@ export default function App() {
     const boardCount = gameMode === 'single' ? 1 : gameMode === 'dueto' ? 2 : 4;
     setGuessesByBoard(Array(boardCount).fill([]).map(() => []));
     setIsCompleted(false);
-    setCurrentGuess('');
+    setCurrentGuess(Array(5).fill(''));
+    setFocusedLetterIndex(0);
   }, [gameMode]);
 
   // Carrega e mescla estatísticas vindas do Supabase
@@ -135,7 +142,7 @@ export default function App() {
     try {
       const { data, error } = await supabase
         .from('game_stats')
-        .select('game_mode, current_streak, max_streak, last_played_date');
+        .select('game_mode, current_win_streak, max_win_streak, current_daily_streak, max_daily_streak, last_played_date');
 
       if (error) throw error;
 
@@ -154,16 +161,22 @@ export default function App() {
         data.forEach((row: any) => {
           const mode = modesMap[row.game_mode];
           if (mode) {
-            // Mescla: mantemos a maior streak máxima registrada
             const localStat = mergedStats[mode];
-            const maxStreak = Math.max(localStat.maxStreak, row.max_streak);
+            const maxDailyStreak = Math.max(localStat.maxDailyStreak, row.max_daily_streak);
+            const maxWinStreak = Math.max(localStat.maxWinStreak, row.max_win_streak);
             
-            // Se o BD tem informações mais atualizadas ou maior streak
-            if (row.max_streak > localStat.maxStreak || row.current_streak > localStat.currentStreak) {
+            if (
+              row.max_daily_streak > localStat.maxDailyStreak || 
+              row.max_win_streak > localStat.maxWinStreak ||
+              row.current_daily_streak > localStat.currentDailyStreak ||
+              row.current_win_streak > localStat.currentWinStreak
+            ) {
               mergedStats[mode] = {
                 ...localStat,
-                currentStreak: row.current_streak,
-                maxStreak: maxStreak
+                currentDailyStreak: Math.max(localStat.currentDailyStreak, row.current_daily_streak),
+                maxDailyStreak: maxDailyStreak,
+                currentWinStreak: Math.max(localStat.currentWinStreak, row.current_win_streak),
+                maxWinStreak: maxWinStreak
               };
               hasChanges = true;
             }
@@ -194,8 +207,10 @@ export default function App() {
       const upsertData = modes.map(mode => ({
         user_id: userId,
         game_mode: mode,
-        current_streak: statsToSend[mode].currentStreak,
-        max_streak: statsToSend[mode].maxStreak,
+        current_win_streak: statsToSend[mode].currentWinStreak,
+        max_win_streak: statsToSend[mode].maxWinStreak,
+        current_daily_streak: statsToSend[mode].currentDailyStreak,
+        max_daily_streak: statsToSend[mode].maxDailyStreak,
         last_played_date: getLocalDateString()
       }));
 
@@ -223,17 +238,47 @@ export default function App() {
     setTimeout(() => setShaking(false), 400);
   };
 
-  // Adiciona caractere digitado
+  // Adiciona caractere digitado na posicao focada
   const handleChar = (char: string) => {
-    if (currentGuess.length < 5 && !isCompleted) {
-      setCurrentGuess(prev => prev + char.toLowerCase());
+    if (isCompleted) return;
+
+    const newGuess = [...currentGuess];
+    newGuess[focusedLetterIndex] = char.toLowerCase();
+    setCurrentGuess(newGuess);
+
+    // Avanca o foco de forma inteligente para o proximo indice vazio
+    let nextIndex = (focusedLetterIndex + 1) % 5;
+    let foundEmpty = false;
+    for (let offset = 0; offset < 5; offset++) {
+      const idx = (nextIndex + offset) % 5;
+      if (newGuess[idx] === '') {
+        setFocusedLetterIndex(idx);
+        foundEmpty = true;
+        break;
+      }
+    }
+    // Se todas as caixas ja estiverem cheias, apenas mantem/avanca circularmente
+    if (!foundEmpty) {
+      setFocusedLetterIndex((focusedLetterIndex + 1) % 5);
     }
   };
 
-  // Remove o último caractere digitado
+  // Remove o caractere focado ou volta para a esquerda limpando
   const handleDelete = () => {
-    if (currentGuess.length > 0 && !isCompleted) {
-      setCurrentGuess(prev => prev.slice(0, -1));
+    if (isCompleted) return;
+
+    const newGuess = [...currentGuess];
+    if (newGuess[focusedLetterIndex] !== '') {
+      newGuess[focusedLetterIndex] = '';
+      setCurrentGuess(newGuess);
+    } else {
+      // Se o foco ja estava vazio, volta 1 casa para a esquerda e limpa
+      if (focusedLetterIndex > 0) {
+        const prevIndex = focusedLetterIndex - 1;
+        newGuess[prevIndex] = '';
+        setCurrentGuess(newGuess);
+        setFocusedLetterIndex(prevIndex);
+      }
     }
   };
 
@@ -241,11 +286,12 @@ export default function App() {
   const handleEnter = () => {
     if (isCompleted) return;
 
-    const guess = currentGuess.toLowerCase();
+    // Junta as letras para validacao
+    const guess = currentGuess.join('').toLowerCase();
 
-    // Validação de tamanho
-    if (guess.length < 5) {
-      showBanner('Palavra muito curta');
+    // Validação de tamanho (se alguma caixa estiver vazia)
+    if (guess.length < 5 || currentGuess.includes('')) {
+      showBanner('Palavra incompleta');
       triggerShake();
       return;
     }
@@ -269,12 +315,11 @@ export default function App() {
     });
 
     setGuessesByBoard(newGuessesByBoard);
-    setCurrentGuess('');
+    setCurrentGuess(Array(5).fill(''));
+    setFocusedLetterIndex(0);
 
     // Salva progresso diário local do jogo atual
     const today = getLocalDateString();
-    
-    // Verifica vitória ou derrota
     
     // Um tabuleiro está resolvido se a resposta secreta dele está na lista de palpites
     const solvedStates = newGuessesByBoard.map((guesses, idx) => guesses.includes(answers[idx]));
@@ -321,7 +366,7 @@ export default function App() {
     }
   };
 
-  // Atualiza as estatísticas de vitórias e streaks
+  // Atualiza as estatísticas de vitórias e streaks separados
   const updateStats = async (isWin: boolean) => {
     const today = getLocalDateString();
     const currentModeStats = allStats[gameMode];
@@ -329,27 +374,38 @@ export default function App() {
     const gamesPlayed = currentModeStats.gamesPlayed + 1;
     const gamesWon = isWin ? currentModeStats.gamesWon + 1 : currentModeStats.gamesWon;
     
-    let currentStreak = currentModeStats.currentStreak;
+    // Recupera a data do ultimo jogo do modo
+    const lastPlayedStr = localStorage.getItem(`termo_last_played_${gameMode}`) || '';
     
-    if (isWin) {
-      // Verifica se o streak diário ainda é válido ou se ele pulou dias
-      const lastPlayedStr = localStorage.getItem(`termo_last_played_${gameMode}`) || '';
-      const isStreakValid = isDailyStreakValid(lastPlayedStr, today);
-      
-      currentStreak = isStreakValid ? currentStreak + 1 : 1;
+    // 1. Calculo do Streak Diario (dias seguidos jogados)
+    let currentDailyStreak = currentModeStats.currentDailyStreak || 0;
+    if (lastPlayedStr === today) {
+      // Ja jogou hoje (ex: o usuario re-iniciou o mesmo dia) - nao incrementa novamente
     } else {
-      currentStreak = 0; // Zerou o streak ao perder
+      const isStreakValid = isDailyStreakValid(lastPlayedStr, today);
+      currentDailyStreak = isStreakValid ? currentDailyStreak + 1 : 1;
     }
+    const maxDailyStreak = Math.max(currentModeStats.maxDailyStreak || 0, currentDailyStreak);
 
-    const maxStreak = Math.max(currentModeStats.maxStreak, currentStreak);
+    // 2. Calculo do Streak de Vitorias (vitórias seguidas sem errar)
+    let currentWinStreak = currentModeStats.currentWinStreak || 0;
+    if (isWin) {
+      const isStreakValid = isDailyStreakValid(lastPlayedStr, today);
+      currentWinStreak = isStreakValid ? currentWinStreak + 1 : 1;
+    } else {
+      currentWinStreak = 0; // Zerou o streak ao perder
+    }
+    const maxWinStreak = Math.max(currentModeStats.maxWinStreak || 0, currentWinStreak);
 
     // Atualiza estado local
     const updatedModeStats = {
       ...currentModeStats,
       gamesPlayed,
       gamesWon,
-      currentStreak,
-      maxStreak
+      currentDailyStreak,
+      maxDailyStreak,
+      currentWinStreak,
+      maxWinStreak
     };
 
     const newAllStats = {
@@ -478,6 +534,8 @@ export default function App() {
                 isCompleted={isCompleted}
                 maxGuesses={maxGuesses}
                 shaking={shaking}
+                focusedLetterIndex={focusedLetterIndex}
+                onLetterClick={setFocusedLetterIndex}
               />
             );
           })}
