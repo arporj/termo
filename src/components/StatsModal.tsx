@@ -92,20 +92,20 @@ export const StatsModal: React.FC<StatsModalProps> = ({
     return grid;
   };
 
+  // Verifica recordes e adiciona medalhas correspondentes
+  const isDailyRecord = stats.currentDailyStreak >= stats.maxDailyStreak && stats.maxDailyStreak > 0;
+  const isWinRecord = stats.currentWinStreak >= stats.maxWinStreak && stats.maxWinStreak > 0;
+
   const handleShareWhatsApp = () => {
     const isSolvedAll = guessesByBoard.every((guesses, idx) => guesses.includes(answers[idx]));
     const totalAttempts = Math.max(...guessesByBoard.map(g => g.length));
     const scoreStr = isSolvedAll ? `${totalAttempts}/${maxGuesses}` : `X/${maxGuesses}`;
-    
-    // Verifica recordes e adiciona medalhas correspondentes
-    const isDailyRecord = stats.currentDailyStreak >= stats.maxDailyStreak && stats.maxDailyStreak > 0;
-    const isWinRecord = stats.currentWinStreak >= stats.maxWinStreak && stats.maxWinStreak > 0;
 
     const titleText = `Joguei o ${modeNames[gameMode]}!\nResultado: ${scoreStr}\n\n`;
     const emojis = getEmojiGrid();
     
     const statsText = `\n🔥 Dias Seguidos: ${stats.currentDailyStreak}${isDailyRecord ? ' 🏆 (Recorde!)' : ''}` +
-      `\n🎯 Vitórias Sem Errar: ${stats.currentWinStreak}${isWinRecord ? ' 🥇 (Recorde!)' : ''}\n`;
+      `\n🎯 Vitórias Sem Errar: ${stats.currentWinStreak}${isWinRecord ? ' 🏅 (Recorde!)' : ''}\n`;
 
     const linkText = `\nJogue também em: ${window.location.origin}`;
 
@@ -138,12 +138,18 @@ export const StatsModal: React.FC<StatsModalProps> = ({
             <div className="stat-val" style={{ fontSize: '1.5rem' }}>{winRate}%</div>
             <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Vitórias</div>
           </div>
-          <div className="stat-item" style={{ padding: '0.75rem 0.25rem' }}>
-            <div className="stat-val" style={{ fontSize: '1.5rem' }}>{stats.currentDailyStreak}</div>
+          <div className="stat-item" style={{ padding: '0.75rem 0.25rem', position: 'relative' }}>
+            <div className="stat-val" style={{ fontSize: '1.5rem' }}>
+              {stats.currentDailyStreak}
+              {isDailyRecord && <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>🏆</span>}
+            </div>
             <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Dias Seg.</div>
           </div>
-          <div className="stat-item" style={{ padding: '0.75rem 0.25rem' }}>
-            <div className="stat-val" style={{ fontSize: '1.5rem' }}>{stats.currentWinStreak}</div>
+          <div className="stat-item" style={{ padding: '0.75rem 0.25rem', position: 'relative' }}>
+            <div className="stat-val" style={{ fontSize: '1.5rem' }}>
+              {stats.currentWinStreak}
+              {isWinRecord && <span style={{ fontSize: '0.9rem', marginLeft: '0.2rem' }}>🏅</span>}
+            </div>
             <div className="stat-lbl" style={{ fontSize: '0.65rem' }}>Vit. Seg.</div>
           </div>
         </div>
@@ -151,11 +157,15 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', padding: '0 0.5rem', fontSize: '0.85rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#94a3b8' }}>Recorde Dias Seguidos:</span>
-            <span style={{ fontWeight: 700, color: '#f8fafc' }}>{stats.maxDailyStreak} dias</span>
+            <span style={{ fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              {stats.maxDailyStreak} dias {isDailyRecord && <span>🏆</span>}
+            </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#94a3b8' }}>Recorde Vitórias Seguidas:</span>
-            <span style={{ fontWeight: 700, color: '#f8fafc' }}>{stats.maxWinStreak} vitórias</span>
+            <span style={{ fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              {stats.maxWinStreak} vitórias {isWinRecord && <span>🏅</span>}
+            </span>
           </div>
         </div>
 
