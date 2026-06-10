@@ -1,5 +1,5 @@
 import React from 'react';
-import { checkGuess, normalizeText } from '../utils/gameLogic';
+import { checkGuess } from '../utils/gameLogic';
 import { Share2, LogOut, Link2, X } from 'lucide-react';
 
 interface GameStatsData {

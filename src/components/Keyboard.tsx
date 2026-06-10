@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { checkGuess, LetterState, normalizeText } from '../utils/gameLogic';
+import { checkGuess, normalizeText } from '../utils/gameLogic';
+import type { LetterState } from '../utils/gameLogic';
 
 interface KeyboardProps {
   onChar: (value: string) => void;

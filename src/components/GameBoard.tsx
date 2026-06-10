@@ -1,5 +1,6 @@
 import React from 'react';
-import { checkGuess, LetterState } from '../utils/gameLogic';
+import { checkGuess } from '../utils/gameLogic';
+import type { LetterState } from '../utils/gameLogic';
 
 interface GameBoardProps {
   guesses: string[];

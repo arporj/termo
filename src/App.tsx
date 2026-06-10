@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { getWordsOfDay, checkGuess, isDailyStreakValid, getLocalDateString, normalizeText } from './utils/gameLogic';
+import { getWordsOfDay, isDailyStreakValid, getLocalDateString, normalizeText } from './utils/gameLogic';
 import { VALID_GUESSES } from './data/wordlist';
 import { GameBoard } from './components/GameBoard';
 import { Keyboard } from './components/Keyboard';
 import { StatsModal } from './components/StatsModal';
 import { AuthModal } from './components/AuthModal';
-import { BarChart3, HelpCircle, User, LogOut } from 'lucide-react';
+import { BarChart3, HelpCircle, User, LogOut, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface GameStatsData {
@@ -38,7 +38,6 @@ export default function App() {
   const [shaking, setShaking] = useState(false);
   
   // Utilidades e Feedbacks
-  const [dateStr, setDateStr] = useState(getLocalDateString());
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
   
   // Autenticação e Estatísticas
@@ -101,7 +100,6 @@ export default function App() {
   // 3. Inicializar ou carregar o jogo diário atual
   useEffect(() => {
     const today = getLocalDateString();
-    setDateStr(today);
     
     // Gera as palavras secretas do dia
     const dailyAnswers = getWordsOfDay(gameMode, today);
@@ -187,7 +185,7 @@ export default function App() {
   };
 
   // Envia as estatísticas locais para o Supabase (Upsert)
-  const syncLocalStatsToSupabase = async (userId: string, userEmail: string, statsToSend = allStats) => {
+  const syncLocalStatsToSupabase = async (userId: string, _userEmail: string, statsToSend = allStats) => {
     if (!supabase) return;
 
     try {
@@ -277,7 +275,6 @@ export default function App() {
     const today = getLocalDateString();
     
     // Verifica vitória ou derrota
-    const boardCount = answers.length;
     
     // Um tabuleiro está resolvido se a resposta secreta dele está na lista de palpites
     const solvedStates = newGuessesByBoard.map((guesses, idx) => guesses.includes(answers[idx]));
