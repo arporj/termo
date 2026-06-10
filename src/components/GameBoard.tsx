@@ -4,11 +4,13 @@ import type { LetterState } from '../utils/gameLogic';
 
 interface GameBoardProps {
   guesses: string[];
-  currentGuess: string;
+  currentGuess: string[]; // Alterado para string[] para digitação em qualquer posição
   answer: string;
   isCompleted: boolean;
   maxGuesses: number;
   shaking: boolean;
+  focusedLetterIndex: number; // Índice focado de digitação
+  onLetterClick?: (index: number) => void; // Evento de clique para mudar o foco
   boardIndex?: number;
   totalBoards?: number;
 }
@@ -20,6 +22,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   isCompleted,
   maxGuesses,
   shaking,
+  focusedLetterIndex,
+  onLetterClick,
   boardIndex,
   totalBoards
 }) => {
@@ -30,29 +34,40 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   for (let i = 0; i < maxGuesses; i++) {
     const isCurrentRow = i === guesses.length;
     const isPastRow = i < guesses.length;
-    const rowGuess = isPastRow ? guesses[i] : isCurrentRow && !isCompleted ? currentGuess : '';
+    
+    // Normaliza a linha para ser sempre um array de 5 strings
+    const rowGuess: string[] = isPastRow 
+      ? guesses[i].split('') 
+      : isCurrentRow && !isCompleted 
+        ? currentGuess 
+        : Array(5).fill('');
 
     const letters = [];
     let letterStates: LetterState[] = Array(5).fill('empty');
 
     if (isPastRow) {
-      letterStates = checkGuess(rowGuess, answer);
+      // Para validar, juntamos o palpite anterior que era string
+      letterStates = checkGuess(guesses[i], answer);
     }
 
     for (let j = 0; j < 5; j++) {
       const char = rowGuess[j] || '';
       const state = isPastRow ? letterStates[j] : 'empty';
       const isActive = isCurrentRow && char !== '' && !isCompleted;
+      const isFocused = isCurrentRow && j === focusedLetterIndex && !isCompleted;
 
       // Adiciona delays para a animação de flip sequencial em linhas anteriores
       const animationDelayClass = isPastRow ? `delay-${j}` : '';
       const stateClass = isPastRow ? state : '';
       const activeClass = isActive ? 'active' : '';
+      const focusedClass = isFocused ? 'focused' : '';
 
       letters.push(
         <div
           key={j}
-          className={`letter-box ${stateClass} ${activeClass} ${animationDelayClass}`}
+          className={`letter-box ${stateClass} ${activeClass} ${focusedClass} ${animationDelayClass}`}
+          onClick={() => isCurrentRow && !isCompleted && onLetterClick && onLetterClick(j)}
+          style={{ cursor: isCurrentRow && !isCompleted ? 'pointer' : 'default' }}
         >
           {char}
         </div>
