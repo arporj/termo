@@ -279,10 +279,13 @@ export default function App() {
       return;
     }
 
-    // Caso 2: A caixa atual em foco está preenchida. Limpa-a e mantém o foco nela.
+    // Caso 2: A caixa atual em foco está preenchida. Limpa-a e recua o foco para a letra anterior.
     if (newGuess[focusedLetterIndex] !== '') {
       newGuess[focusedLetterIndex] = '';
       setCurrentGuess(newGuess);
+      if (focusedLetterIndex > 0) {
+        setFocusedLetterIndex(focusedLetterIndex - 1);
+      }
       return;
     }
 
