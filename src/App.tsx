@@ -248,12 +248,10 @@ export default function App() {
 
     // Avanca o foco de forma inteligente para o proximo indice vazio
     let nextIndex = (focusedLetterIndex + 1) % 5;
-    let foundEmpty = false;
     for (let offset = 0; offset < 5; offset++) {
       const idx = (nextIndex + offset) % 5;
       if (newGuess[idx] === '') {
         setFocusedLetterIndex(idx);
-        foundEmpty = true;
         break;
       }
     }
